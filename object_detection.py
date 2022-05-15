@@ -7,10 +7,10 @@ import glob  # Filename handling library
 # Inception V3 model for Keras
 from tensorflow.keras.applications.inception_v3 import preprocess_input
 
-# To detect objects, we will use a pretrained neural network that has been
-# trained on the COCO data set. You can read more about this data set here:
+# Для обнаружения объектов мы будем использовать предварительно обученную нейронную сеть,
+# обученную на наборе данных COCO. Подробнее об этом наборе данных можно прочитать здесь:
 #   https://content.alegion.com/datasets/coco-ms-coco-dataset
-# COCO labels are here: https://github.com/tensorflow/models/blob/master/research/object_detection/data/mscoco_label_map.pbtxt
+# COCO labels здесь: https://github.com/tensorflow/models/blob/master/research/object_detection/data/mscoco_label_map.pbtxt
 LABEL_PERSON = 1
 LABEL_CAR = 3
 LABEL_BUS = 6
@@ -21,7 +21,7 @@ LABEL_STOP_SIGN = 13
 
 def accept_box(boxes, box_index, tolerance):
     """
-    Eliminate duplicate bounding boxes.
+    Удалим повторяющиеся ограничивающие рамки.
     """
     box = boxes[box_index]
 
@@ -36,30 +36,31 @@ def accept_box(boxes, box_index, tolerance):
 
 def get_files(pattern):
     """
-    Create a list of all the images in a directory
+    Создать список всех изображений в каталоге.
 
-    :param:pattern str The pattern of the filenames
-    :return: A list of the files that match the specified pattern
+    :param:pattern str - паттерн имен файлов
+    :return: Список файлов, соответствующих указанному паттерну.
     """
     files = []
 
-    # For each file that matches the specified pattern
+    # Для каждого файла, соответствующего указанному шаблону
     for file_name in glob.iglob(pattern, recursive=True):
-        # Add the image file to the list of files
+        # Добавьте файл изображения в список файлов
         files.append(file_name)
 
-    # Return the complete file list
+    # Вернуть полный список файлов
     return files
 
 
 def load_model(model_name):
     """
-    Download a pretrained object detection model, and save it to your hard drive.
-    :param:str Name of the pretrained object detection model
+    Загрузка предварительно обученной модели обнаружения объектов и её сохранение на жестком диске.
+
+    :param:str Name - имя предварительно обученной модели обнаружения объектов
     """
     url = 'http://download.tensorflow.org/models/object_detection/tf2/20200711/' + model_name + '.tar.gz'
 
-    # Download a file from a URL that is not already in the cache
+    # Загрузка файла с URL-адреса, которого еще нет в кеше
     model_dir = tf.keras.utils.get_file(fname=model_name, untar=True, origin=url)
 
     print("Model path: ", str(model_dir))
@@ -72,18 +73,18 @@ def load_model(model_name):
 
 def load_rgb_images(pattern, shape=None):
     """
-    Loads the images in RGB format.
+    Загружает изображения в формате RGB.
 
-    :param:pattern str The pattern of the filenames
-    :param:shape Image dimensions (width, height)
+    :param:pattern str - паттерн имен файлов
+    :param:shape - Размеры изображения (ширина, высота)
     """
-    # Get a list of all the image files in a directory
+    # Получим список всех файлов изображений в каталоге
     files = get_files(pattern)
 
-    # For each image in the directory, convert it from BGR format to RGB format
+    # Для каждого изображения в каталоге преобразуйте его из формата BGR в формат RGB.
     images = [cv2.cvtColor(cv2.imread(file), cv2.COLOR_BGR2RGB) for file in files]
 
-    # Resize the image if the desired shape is provided
+    # Изменить размер изображения, если нужная форма предоставлена
     if shape:
         return [cv2.resize(img, shape) for img in images]
     else:
@@ -92,30 +93,28 @@ def load_rgb_images(pattern, shape=None):
 
 def load_ssd_coco():
     """
-    Load the neural network that has the SSD architecture, trained on the COCO
-    data set.
+    Загрузка нейронной сети с архитектурой SSD, обученной на наборе данных COCO.
     """
     return load_model("ssd_resnet50_v1_fpn_640x640_coco17_tpu-8")
 
 
 def save_image_annotated(img_rgb, file_name, output, model_traffic_lights=None):
     """
-    Annotate the image with the object types, and generate cropped images of
-    traffic lights.
+    Аннотируйте изображение с типами объектов и создавайте обрезанные изображения светофоров.
     """
-    # Create annotated image file
+    # Создать аннотированный файл изображения
     output_file = file_name.replace('.jpg', '_test.jpg')
 
-    # For each bounding box that was detected
+    # Для каждой обнаруженной bounding box
     for idx in range(len(output['boxes'])):
 
-        # Extract the type of the object that was detected
+        # Извлечь тип обнаруженного объекта
         obj_class = output["detection_classes"][idx]
 
-        # How confident the object detection model is on the object's type
+        # Насколько модель обнаружения объектов уверена в типе объекта
         score = int(output["detection_scores"][idx] * 100)
 
-        # Extract the bounding box
+        # Извлечь bounding box
         box = output["boxes"][idx]
 
         color = None
@@ -142,11 +141,11 @@ def save_image_annotated(img_rgb, file_name, output, model_traffic_lights=None):
 
             if model_traffic_lights:
 
-                # Annotate the image and save it
+                # Аннотируйте изображение и сохраните его
                 img_traffic_light = img_rgb[box["y"]:box["y2"], box["x"]:box["x2"]]
                 img_inception = cv2.resize(img_traffic_light, (299, 299))
 
-                # Uncomment this if you want to save a cropped image of the traffic light
+                # Надо раскомментить, чтобы сохранить обрезанное изображение светофора.
                 # cv2.imwrite(output_file.replace('.jpg', '_crop.jpg'), cv2.cvtColor(img_inception, cv2.COLOR_RGB2BGR))
                 img_inception = np.array([preprocess_input(img_inception)])
 
@@ -160,8 +159,10 @@ def save_image_annotated(img_rgb, file_name, output, model_traffic_lights=None):
                 elif label == 2:
                     label_text = "Red " + score_light
                 else:
-                    label_text = 'NO-LIGHT'  # This is not a traffic light
+                    label_text = 'NO-LIGHT'  # это не светофор
 
+        # Чтобы повысить производительность, лучше поиграться с порогом оценки score.
+        # score находится на пороге от 0 до 100. Можно попробовать, например, 40.
         if color and label_text and accept_box(output["boxes"], idx, 5.0) and score > 50:
             cv2.rectangle(img_rgb, (box["x"], box["y"]), (box["x2"], box["y2"]), color, 2)
             cv2.putText(img_rgb, label_text, (box["x"], box["y"]), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
@@ -172,27 +173,27 @@ def save_image_annotated(img_rgb, file_name, output, model_traffic_lights=None):
 
 def center(box, coord_type):
     """
-    Get center of the bounding box.
+    Центр ограничивающей рамки.
     """
     return (box[coord_type] + box[coord_type + "2"]) / 2
 
 
 def perform_object_detection(model, file_name, save_annotated=False, model_traffic_lights=None):
     """
-    Perform object detection on an image using the predefined neural network.
+    Выполняется обнаружение объектов на изображении с помощью предопределенной нейронной сети.
     """
-    # Store the image
+    # Храним изображение
     img_bgr = cv2.imread(file_name)
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
-    input_tensor = tf.convert_to_tensor(img_rgb)  # Input needs to be a tensor
+    input_tensor = tf.convert_to_tensor(img_rgb)  # input должен быть тензором
     input_tensor = input_tensor[tf.newaxis, ...]
 
-    # Run the model
+    # Запускаем модель
     output = model(input_tensor)
 
     print("num_detections:", output['num_detections'], int(output['num_detections']))
 
-    # Convert the tensors to a NumPy array
+    # Преобразуем тензоры в массив NumPy
     num_detections = int(output.pop('num_detections'))
     output = {key: value[0, :num_detections].numpy()
               for key, value in output.items()}
@@ -201,7 +202,7 @@ def perform_object_detection(model, file_name, save_annotated=False, model_traff
     print('Detection classes:', output['detection_classes'])
     print('Detection Boxes:', output['detection_boxes'])
 
-    # The detected classes need to be integers.
+    # Обнаруженные классы должны быть integer
     output['detection_classes'] = output['detection_classes'].astype(np.int64)
     output['boxes'] = [
         {"y": int(box[0] * img_rgb.shape[0]), "x": int(box[1] * img_rgb.shape[1]), "y2": int(box[2] * img_rgb.shape[0]),
@@ -215,40 +216,40 @@ def perform_object_detection(model, file_name, save_annotated=False, model_traff
 
 def perform_object_detection_video(model, video_frame, model_traffic_lights=None):
     """
-    Perform object detection on a video using the predefined neural network.
+    Выполняет обнаружение объектов на видео с помощью предопределенной нейронной сети.
 
-    Returns the annotated video frame.
+    Возвращает аннотированный видеокадр.
     """
-    # Store the image
+    # Храним изображение
     img_rgb = cv2.cvtColor(video_frame, cv2.COLOR_BGR2RGB)
-    input_tensor = tf.convert_to_tensor(img_rgb)  # Input needs to be a tensor
+    input_tensor = tf.convert_to_tensor(img_rgb)  # input должен быть тензором
     input_tensor = input_tensor[tf.newaxis, ...]
 
-    # Run the model
+    # Запускаем модель
     output = model(input_tensor)
 
-    # Convert the tensors to a NumPy array
+    # Преобразуем тензоры в массив NumPy
     num_detections = int(output.pop('num_detections'))
     output = {key: value[0, :num_detections].numpy()
               for key, value in output.items()}
     output['num_detections'] = num_detections
 
-    # The detected classes need to be integers.
+    # Обнаруженные классы должны быть integer
     output['detection_classes'] = output['detection_classes'].astype(np.int64)
     output['boxes'] = [
         {"y": int(box[0] * img_rgb.shape[0]), "x": int(box[1] * img_rgb.shape[1]), "y2": int(box[2] * img_rgb.shape[0]),
          "x2": int(box[3] * img_rgb.shape[1])} for box in output['detection_boxes']]
 
-    # For each bounding box that was detected
+    # Для каждой обнаруженной bounding box
     for idx in range(len(output['boxes'])):
 
-        # Extract the type of the object that was detected
+        # Извлечь тип обнаруженного объекта
         obj_class = output["detection_classes"][idx]
 
-        # How confident the object detection model is on the object's type
+        # Насколько модель обнаружения объектов уверена в типе объекта
         score = int(output["detection_scores"][idx] * 100)
 
-        # Extract the bounding box
+        # Извлечь bounding box
         box = output["boxes"][idx]
 
         color = None
@@ -275,7 +276,7 @@ def perform_object_detection_video(model, video_frame, model_traffic_lights=None
 
             if model_traffic_lights:
 
-                # Annotate the image and save it
+                # Аннотируйте изображение и сохраните его
                 img_traffic_light = img_rgb[box["y"]:box["y2"], box["x"]:box["x2"]]
                 img_inception = cv2.resize(img_traffic_light, (299, 299))
 
@@ -291,11 +292,11 @@ def perform_object_detection_video(model, video_frame, model_traffic_lights=None
                 elif label == 2:
                     label_text = "Red " + score_light
                 else:
-                    label_text = 'NO-LIGHT'  # This is not a traffic light
+                    label_text = 'NO-LIGHT'  # это не светофор
 
-        # Use the score variable to indicate how confident we are it is a traffic light (in % terms)
-        # On the actual video frame, we display the confidence that the light is either red, green,
-        # yellow, or not a valid traffic light.
+        # Используем переменную оценки, чтобы указать, насколько мы уверены, что это светофор (в %).
+        # На реальном видеокадре мы отображаем достоверность того, что свет красный, зеленый,
+        # желтый или недействительный светофор.
         if color and label_text and accept_box(output["boxes"], idx, 5.0) and score > 20:
             cv2.rectangle(img_rgb, (box["x"], box["y"]), (box["x2"], box["y2"]), color, 2)
             cv2.putText(img_rgb, label_text, (box["x"], box["y"]), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
@@ -306,7 +307,7 @@ def perform_object_detection_video(model, video_frame, model_traffic_lights=None
 
 def double_shuffle(images, labels):
     """
-    Shuffle the images to add some randomness.
+    Перемешивание изображений, чтобы добавить случайности.
     """
     indexes = np.random.permutation(len(images))
 
@@ -315,7 +316,7 @@ def double_shuffle(images, labels):
 
 def reverse_preprocess_inception(img_preprocessed):
     """
-    Reverse the preprocessing process.
+    Обратный процесс предварительной обработки.
     """
     img = img_preprocessed + 1.0
     img = img * 127.5

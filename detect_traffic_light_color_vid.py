@@ -8,27 +8,27 @@ from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.preprocessing.image import load_img
 from datetime import datetime
 
-# Make sure the video file is in the same directory as your code
+# Важно: файл должен находиться в том же каталоге, где и наш код.
 filename = 'las_vegas_Trim.mp4'
-file_size = (1920, 1080)  # Assumes 1920x1080 mp4
-scale_ratio = 1  # Option to scale to fraction of original size.
+file_size = (1920, 1080)  # Предполагается размер файла и формат 1920x1080 mp4
+scale_ratio = 1  # Опция для масштабирования до доли исходного размера.
 
-# We want to save the output to a video file
+# Сохраним выходное видео со следующим названием и фпс
 output_filename = 'las_vegas_annotated.mp4'
 output_frames_per_second = 30.0
 
-# Load the SSD neural network that is trained on the COCO data set
+# Загрузим нейронную сеть SSD, обученную на наборе данных COCO.
 model_ssd = object_detection.load_ssd_coco()
 
-# Load the trained neural network
+# Загрузим обученную нейронную сеть
 model_traffic_lights_nn = keras.models.load_model("traffic.h5")
 
 
 def main():
-    # Load a video
+    # Загрузим видео
     cap = cv2.VideoCapture(filename)
 
-    # Create a VideoWriter object so we can save the video output
+    # Создадим объект VideoWriter, чтобы мы могли сохранить вывод видео.
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     result = cv2.VideoWriter(output_filename,
                              fourcc,
@@ -36,44 +36,44 @@ def main():
                              file_size)
 
     frame_number = 0
-    # Process the video
+    # Обработаем видео
     while cap.isOpened():
 
-        # Capture one frame at a time
+        # Каждой итерацией берём по одному кадру
         success, frame = cap.read()
 
-        # Do we have a video frame? If true, proceed.
+        # Пока есть кадр из видео, продолжаем
         if success:
 
-            # Resize the frame
+            # Изменим размер кадра
             width = int(frame.shape[1] * scale_ratio)
             height = int(frame.shape[0] * scale_ratio)
             frame = cv2.resize(frame, (width, height))
 
-            # Store the original frame
+            # Сохраним оригинальный кадр
             original_frame = frame.copy()
 
             output_frame = object_detection.perform_object_detection_video(
                 model_ssd, frame, model_traffic_lights=model_traffic_lights_nn)
 
-            # Write the frame to the output video file
+            # Записываем кадр в выходной видеофайл
             result.write(output_frame)
 
             frame_number += 1
             print('{0}: Frame number: {1}'.format(datetime.now(), frame_number))
 
-        # No more video frames left
+        # Если кадров больше не осталось, заканчиваем цикл
         else:
             print('No frames left')
             break
 
-    # Stop when the video is finished
+    # Остановим, когда видео закончится
     cap.release()
 
-    # Release the video recording
+    # Реализуем видос
     result.release()
 
-    # Close all windows
+    # Закроем все окна
     cv2.destroyAllWindows()
 
 

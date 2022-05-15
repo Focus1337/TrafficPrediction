@@ -1,65 +1,64 @@
 import cv2  # Computer vision library
 import object_detection  # Contains methods for object detection in images
 
-# Get a list of jpeg image files containing traffic lights
+# Получим список файлов изображений JPEG, содержащих светофоры
 files = object_detection.get_files('traffic_light_input/*.jpg')
 
-# Load the object detection model
+# Загрузим модель обнаружения объектов
 this_model = object_detection.load_ssd_coco()
 
-# Keep track of the number of traffic lights found
+# Следим за количеством найденных светофоров
 traffic_light_count = 0
 
-# Keep track of the number of image files that were processed
+# Следим за количеством файлов изображений, которые были обработаны
 file_count = 0
 
-# Display a count of the number of images we need to process
+# Отобразим количество изображений, которые нам нужно обработать
 print("Number of Images:", len(files))
 
-# Go through each image file, one at a time
+# Просмотрим каждый файл изображения по одному
 for file in files:
 
-    # Detect objects in the image
-    # img_rgb is the original image in RGB format
-    # out is a dictionary containing the results of object detection
-    # file_name is the name of the file
+    # img_rgb — исходное изображение в формате RGB
+    # out — словарь, содержащий результаты обнаружения объектов
+    # file_name — имя файла
     (img_rgb, out, file_name) = object_detection.perform_object_detection(model=this_model, file_name=file,
                                                                           save_annotated=None,
                                                                           model_traffic_lights=None)
 
-    # Every 10 files that are processed
+    # Каждые 10 обрабатываемых файлов
     if (file_count % 10) == 0:
-        # Display a count of the number of files that have been processed
+        # Отобразить количество обработанных файлов
         print("Images processed:", file_count)
 
-        # Display the total number of traffic lights that have been identified so far
+        # Отображение общего количества светофоров, которые были идентифицированы до сих пор
         print("Number of Traffic lights identified: ", traffic_light_count)
 
-    # Increment the number of files by 1
+    # Увеличиваем кол-во файлов на 1
     file_count = file_count + 1
 
-    # For each traffic light (i.e. bounding box) that was detected
+    # Для каждого обнаруженного светофора (т. е. ограничивающего прямоугольника)
     for idx in range(len(out['boxes'])):
 
-        # Extract the type of object that was detected
+        # Извлечь тип обнаруженного объекта
         obj_class = out["detection_classes"][idx]
 
-        # If the object that was detected is a traffic light
+        # Если обнаруженный объект является светофором
         if obj_class == object_detection.LABEL_TRAFFIC_LIGHT:
-            # Extract the coordinates of the bounding box
+            # Извлечь координаты bounding box
             box = out["boxes"][idx]
 
-            # Extract (i.e. crop) the traffic light from the image
+            # Извлечь (т.е. обрезать) светофор из изображения
             traffic_light = img_rgb[box["y"]:box["y2"], box["x"]:box["x2"]]
 
-            # Convert the traffic light from RGB format into BGR format
+            # Преобразование светофора из формата RGB в формат BGR
             traffic_light = cv2.cvtColor(traffic_light, cv2.COLOR_RGB2BGR)
 
-            # Store the cropped image in a folder named 'traffic_light_cropped'
+            # Сохранить обрезанное изображение в папке с именем 'traffic_light_cropped'.
             cv2.imwrite("traffic_light_cropped/" + str(traffic_light_count) + ".jpg", traffic_light)
 
-            # Increment the number of traffic lights by 1
+            # Увеличить количество светофоров на 1
             traffic_light_count = traffic_light_count + 1
 
-# Display the total number of traffic lights identified
+# Отображение общего количества идентифицированных светофоров
 print("Number of Traffic lights identified:", traffic_light_count)

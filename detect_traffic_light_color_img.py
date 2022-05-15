@@ -9,33 +9,33 @@ from tensorflow.keras.preprocessing.image import load_img
 
 FILENAME = "test_red.jpg"
 
-# Load the Inception V3 model
+# Загрузим модель Inception V3.
 model_inception = InceptionV3(weights='imagenet', include_top=True, input_shape=(299, 299, 3))
 
-# Resize the image
+# Изменим размер изображения.
 img = cv2.resize(preprocess_input(cv2.imread(FILENAME)), (299, 299))
 
-# Generate predictions
+# Сгенерируем предикшены
 out_inception = model_inception.predict(np.array([img]))
 
-# Decode the predictions
+# Декодим предикшены
 out_inception = imagenet_utils.decode_predictions(out_inception)
 
 print("Prediction for ", FILENAME, ": ", out_inception[0][0][1], out_inception[0][0][2], "%")
 
-# Show model summary data
+# Выведим сводные данные модели
 model_inception.summary()
 
-# Detect traffic light color in a batch of image files
+# Обнаружение цвета светофора в пакете файлов изображений.
 files = object_detection.get_files('test_images/*.jpg')
 
-# Load the SSD neural network that is trained on the COCO data set
+# Загрузим нейронную сеть SSD, обученную на наборе данных COCO.
 model_ssd = object_detection.load_ssd_coco()
 
-# Load the trained neural network
+# Загрузим нашу обученную нейронную сеть.
 model_traffic_lights_nn = keras.models.load_model("traffic.h5")
 
-# Go through all image files, and detect the traffic light color.
+# Просмотр всех файлов изображений и определение цветов светофоров.
 for file in files:
     (img, out, file_name) = object_detection.perform_object_detection(
         model_ssd, file, save_annotated=True, model_traffic_lights=model_traffic_lights_nn)
