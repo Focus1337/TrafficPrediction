@@ -15,7 +15,6 @@ LABEL_CAR = 3
 LABEL_BUS = 6
 LABEL_TRUCK = 8
 
-
 def accept_box(boxes, box_index, tolerance):
     """
     Удалим повторяющиеся ограничивающие рамки.
@@ -180,7 +179,7 @@ def perform_object_detection(model, file_name, save_annotated=False):
     return img_rgb, output, file_name
 
 
-def perform_object_detection_video(model, video_frame):
+def perform_object_detection_video(model, video_frame, frame_number, frames_count, fps):
     """
     Выполняет обнаружение объектов на видео с помощью предопределенной нейронной сети.
 
@@ -223,18 +222,27 @@ def perform_object_detection_video(model, video_frame):
 
         if obj_class == LABEL_CAR:
             color = (255, 255, 0)
-            label_text = "Car " + str(score)
+            label_text = "Car: " + str(score) + '%'
         if obj_class == LABEL_BUS:
             color = (255, 255, 0)
-            label_text = "Bus " + str(score)
+            label_text = "Bus: " + str(score) + '%'
         if obj_class == LABEL_TRUCK:
             color = (255, 255, 0)
-            label_text = "Truck " + str(score)
+            label_text = "Truck: " + str(score) + '%'
 
         # Используем переменную оценки, чтобы указать, насколько мы уверены, что это транспорт (в %).
         if color and label_text and accept_box(output["boxes"], idx, 5.0) and score > 20:
             cv2.rectangle(img_rgb, (box["x"], box["y"]), (box["x2"], box["y2"]), color, 2)
             cv2.putText(img_rgb, label_text, (box["x"], box["y"]), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+
+    cv2.putText(img_rgb, "Frame: " + str(frame_number) + ' of ' + str(frames_count), (0, 75), cv2.FONT_HERSHEY_SIMPLEX,
+                .5, (0, 170, 0), 1)
+
+    cv2.putText(img_rgb, 'Time: ' + str(round(frame_number / fps, 2)) + ' sec of ' + str(round(frames_count / fps, 2))
+                + ' sec', (0, 90), cv2.FONT_HERSHEY_SIMPLEX, .5, (0, 170, 0), 1)
+
+    cv2.putText(img_rgb, 'Fps: ' + str(fps)
+                + ' sec', (0, 105), cv2.FONT_HERSHEY_SIMPLEX, .5, (0, 170, 0), 1)
 
     output_frame = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR)
     return output_frame

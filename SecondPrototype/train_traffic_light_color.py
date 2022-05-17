@@ -8,8 +8,7 @@ import tensorflow as tf  # Machine learning library
 from tensorflow import keras  # Library for neural networks
 from tensorflow.keras.applications.inception_v3 import InceptionV3, preprocess_input
 from tensorflow.keras.callbacks import ModelCheckpoint, EarlyStopping
-from tensorflow.keras.layers import Dense, Flatten, Dropout, GlobalAveragePooling2D, GlobalMaxPooling2D, \
-    BatchNormalization
+from tensorflow.keras.layers import Dense, Flatten, Dropout, GlobalAveragePooling2D, GlobalMaxPooling2D, BatchNormalization
 from tensorflow.keras.losses import categorical_crossentropy
 from tensorflow.keras.models import Model, Sequential
 from tensorflow.keras.optimizers import Adam, Adadelta
@@ -18,18 +17,16 @@ from tensorflow.keras.utils import to_categorical
 
 sys.path.append('../')
 
-# Show the version of TensorFlow and Keras that I am using
 print("TensorFlow", tf.__version__)
 print("Keras", keras.__version__)
 
 
 def show_history(history):
     """
-    Visualize the neural network model training history
-
-    :param:history A record of training loss values and metrics values at
-                   successive epochs, as well as validation loss values
-                   and validation metrics values
+    Визуализация истории обучения модели нейронной сети
+    :param:history — запись значений потерь при обучении и значений
+           показателей в последовательные эпохи, а также значения потерь
+           при проверке и значения показателей проверки.
     """
     plt.plot(history.history['accuracy'])
     plt.plot(history.history['val_accuracy'])
@@ -42,40 +39,36 @@ def show_history(history):
 
 def Transfer(n_classes, freeze_layers=True):
     """
-    Use the InceptionV3 neural network architecture to perform transfer learning.
+    Используется архитектура нейронной сети InceptionV3 для выполнения трансферного обучения.
 
-    :param:n_classes Number of classes
-    :param:freeze_layers If True, the network's parameters don't change.
-    :return The best neural network
+    :param:n_classes - кол-во классов
+    :param:freeze_layers - если True, параметры сети не изменяются
+    :return Лучшая нейронная сеть
     """
     print("Loading Inception V3...")
 
-    # To understand what the parameters mean, do a Google search 'inceptionv3 keras'.
-    # The first search result should send you to the Keras website, which has an
-    # explanation of what each of these parameters mean.
-    # input_top means we are removing the top part of the Inception model, which is the
-    # classifier.
-    # input_shape needs to have 3 channels, and needs to be at least 75x75 for the
-    # resolution.
-    # Our neural network will build off of the Inception V3 model (trained on the ImageNet
-    # data set).
+    # Первый результат поиска должен отправить вас на веб-сайт Keras, на котором есть объяснение того,
+    # что означает каждый из этих параметров.
+    # include_top означает, что мы удаляем верхнюю часть начальной модели, которая является классификатором.
+    # input_shape должен иметь 3 канала и разрешение не менее 75x75.
+    # Наша нейронная сеть будет построена на основе модели Inception V3 (обученной на наборе данных ImageNet).
     base_model = InceptionV3(weights='imagenet', include_top=False, input_shape=(299, 299, 3))
 
     print("Inception V3 has finished loading.")
 
-    # Display the base network architecture
+    # Показать базовую сетевую архитектуру
     print('Layers: ', len(base_model.layers))
     print("Shape:", base_model.output_shape[1:])
     print("Shape:", base_model.output_shape)
     print("Shape:", base_model.outputs)
     base_model.summary()
 
-    # Create the neural network. This network uses the Sequential
-    # architecture where each layer has one
-    # input tensor (e.g. vector, matrix, etc.) and one output tensor
+    # Создаем нейронную сеть. В этой сети используется последовательная архитектура,
+    # в которой каждый слой имеет один входной тензор (например, вектор, матрицу и т. д.)
+    # и один выходной тензор.
     top_model = Sequential()
 
-    # Our classifier model will build on top of the base model
+    # Наша модель классификатора будет построена поверх базовой модели.
     top_model.add(base_model)
     top_model.add(GlobalAveragePooling2D())
     top_model.add(Dropout(0.5))
@@ -87,8 +80,7 @@ def Transfer(n_classes, freeze_layers=True):
     top_model.add(Dense(128, activation='relu'))
     top_model.add(Dense(n_classes, activation='softmax'))
 
-    # Freeze layers in the model so that they cannot be trained (i.e. the
-    # parameters in the neural network will not change)
+    # Заморозим слои в модели, чтобы их нельзя было обучить (т.е. параметры в нейросети не изменятся)
     if freeze_layers:
         for layer in base_model.layers:
             layer.trainable = False
@@ -96,53 +88,52 @@ def Transfer(n_classes, freeze_layers=True):
     return top_model
 
 
-# Perform image augmentation.
-# Image augmentation enables us to alter the available images
-# (e.g. rotate, flip, changing the hue, etc.) to generate more images that our
-# neural network can use for training...therefore preventing us from having to
-# collect more external images.
+# Выполняем увеличение изображения.
+# Увеличение изображения позволяет нам изменять доступные изображения
+# (например: поворот, переворот, изменение оттенка и т.д.), чтобы генерировать больше изображений,
+# которые наша нейронная сеть может использовать для обучения,
+# тем самым избавляя нас от необходимости собирать больше внешних изображений.
 datagen = ImageDataGenerator(rotation_range=5, width_shift_range=[-10, -5, -2, 0, 2, 5, 10],
                              zoom_range=[0.7, 1.5], height_shift_range=[-10, -5, -2, 0, 2, 5, 10],
                              horizontal_flip=True)
 
 shape = (299, 299)
 
-# Load the cropped traffic light images from the appropriate directory
+# Загрузим обрезанные изображения светофора из соответствующего каталога.
 img_0_green = object_detection.load_rgb_images("traffic_light_dataset/0_green/*", shape)
 img_1_yellow = object_detection.load_rgb_images("traffic_light_dataset/1_yellow/*", shape)
 img_2_red = object_detection.load_rgb_images("traffic_light_dataset/2_red/*", shape)
 img_3_not_traffic_light = object_detection.load_rgb_images("traffic_light_dataset/3_not/*", shape)
 
-# Create a list of the labels that is the same length as the number of images in each
-# category
+# Создаем список меток той же длины, что и количество изображений в каждой категории
 # 0 = green
 # 1 = yellow
 # 2 = red
-# 3 = not a traffic light
+# 3 = не светофор
 labels = [0] * len(img_0_green)
 labels.extend([1] * len(img_1_yellow))
 labels.extend([2] * len(img_2_red))
 labels.extend([3] * len(img_3_not_traffic_light))
 
-# Create NumPy array
+# Создаем массив NumPy
 labels_np = np.ndarray(shape=(len(labels), 4))
 images_np = np.ndarray(shape=(len(labels), shape[0], shape[1], 3))
 
-# Create a list of all the images in the traffic lights data set
+# Создаем список всех изображений из dataset светофоров
 img_all = []
 img_all.extend(img_0_green)
 img_all.extend(img_1_yellow)
 img_all.extend(img_2_red)
 img_all.extend(img_3_not_traffic_light)
 
-# Make sure we have the same number of images as we have labels
+# Нужно убедиться, что у нас столько же изображений, сколько у нас меток
 assert len(img_all) == len(labels)
 
-# Shuffle the images
+# Перемешаем изображения
 img_all = [preprocess_input(img) for img in img_all]
 (img_all, labels) = object_detection.double_shuffle(img_all, labels)
 
-# Store images and labels in a NumPy array
+# Храним изображения и метки в массиве NumPy
 for idx in range(len(labels)):
     images_np[idx] = img_all[idx]
     labels_np[idx] = labels[idx]
@@ -150,30 +141,26 @@ for idx in range(len(labels)):
 print("Images: ", len(img_all))
 print("Labels: ", len(labels))
 
-# Perform one-hot encoding
+# Выполняем one-hot кодирование
 for idx in range(len(labels_np)):
-    # We have four integer labels, representing the different colors of the
-    # traffic lights.
+    # У нас есть четыре целочисленных метки, представляющих разные цвета светофоров.
     labels_np[idx] = np.array(to_categorical(labels[idx], 4))
 
-# Split the data set into a training set and a validation set
-# The training set is the portion of the data set that is used to
-#   determine the parameters (e.g. weights) of the neural network.
-# The validation set is the portion of the data set used to
-#   fine tune the model-specific parameters (i.e. hyperparameters) that are
-#   fixed before you train and test your neural network on the data. The
-#   validation set helps us select the final model (e.g. learning rate,
-#   number of hidden layers, number of hidden units, activation functions,
-#   number of epochs, etc.
-# In this case, 80% of the data set becomes training data, and 20% of the
-# data set becomes validation data.
+# Разделяем набор данных на training набор и validation набор.
+# Training набор — это часть набора данных, которая используется для определения параметров
+# (например, весов) нейронной сети.
+# Validation набор — это часть набора данных, используемая для точной настройки параметров модели
+# (т. е. гиперпараметров), которые фиксируются перед обучением и тестированием нейронной сети на данных.
+# Набор проверки помогает нам выбрать окончательную модель (например, скорость обучения,
+# количество скрытых слоев, количество скрытых юнитов, функции активации, количество эпох и т.д.)
+# В этом случае 80% набора данных становятся обучающими данными, а 20% набора данных становятся проверочными данными.
 idx_split = int(len(labels_np) * 0.8)
 x_train = images_np[0:idx_split]
 x_valid = images_np[idx_split:]
 y_train = labels_np[0:idx_split]
 y_valid = labels_np[idx_split:]
 
-# Store a count of the number of traffic lights of each color
+# Храним подсчет количества светофоров каждого цвета
 cnt = collections.Counter(labels)
 print('Labels:', cnt)
 n = len(labels)
@@ -182,39 +169,38 @@ print('1:', cnt[1])
 print('2:', cnt[2])
 print('3:', cnt[3])
 
-# Calculate the weighting of each traffic light class
+# Рассчитаем вес каждого класса светофора
 class_weight = {0: n / cnt[0], 1: n / cnt[1], 2: n / cnt[2], 3: n / cnt[3]}
 print('Class weight:', class_weight)
 
-# Save the best model as traffic.h5
+# Сохраним лучшую модель как traffic.h5
 checkpoint = ModelCheckpoint("traffic.h5", monitor='val_loss', mode='min', verbose=1, save_best_only=True)
 early_stopping = EarlyStopping(min_delta=0.0005, patience=15, verbose=1)
 
-# Generate model using transfer learning
+# Генерируем модель с использованием трансферного обучения
 model = Transfer(n_classes=4, freeze_layers=True)
 
-# Display a summary of the neural network model
+# Отобразим сводки модели нейронной сети
 model.summary()
 
-# Generate a batch of randomly transformed images
+# Генерируем пакет (batch) случайно преобразованных изображений
 it_train = datagen.flow(x_train, y_train, batch_size=32)
 
-# Configure the model parameters for training
+# Настроим параметры модели для обучения
 model.compile(loss=categorical_crossentropy, optimizer=Adadelta(
     lr=1.0, rho=0.95, epsilon=1e-08, decay=0.0), metrics=['accuracy'])
 
-# Train the model on the image batches for a fixed number of epochs
-# Store a record of the error on the training data set and metrics values
-#   in the history object.
-# 250 epochs -> 40 epochs
-history_object = model.fit(it_train, epochs=40, validation_data=(
+# Обучаем модель на пакетах изображений для фиксированного количества эпох.
+# Сохраняем запись об ошибке в наборе обучающих данных и значениях метрик в объекте истории.
+# 250 эпох -> 100 эпох
+history_object = model.fit(it_train, epochs=100, validation_data=(
     x_valid, y_valid), shuffle=True, callbacks=[
     checkpoint, early_stopping], class_weight=class_weight)
 
-# Display the training history
+# Выведем историю тренинга
 show_history(history_object)
 
-# Get the loss value and metrics values on the validation data set
+# Получим значение потерь (loss) и значения метрик в наборе проверочных данных.
 score = model.evaluate(x_valid, y_valid, verbose=0)
 print('Validation loss:', score[0])
 print('Validation accuracy:', score[1])
@@ -223,27 +209,26 @@ print('Saving the validation data set...')
 
 print('Length of the validation data set:', len(x_valid))
 
-# Go through the validation data set, and see how the model did on each image
+# Просмотрим набор проверочных данных и увидим, как модель работала на каждом изображении.
 for idx in range(len(x_valid)):
-    # Make the image a NumPy array
+    # Сделаем изображение массивом NumPy
     img_as_ar = np.array([x_valid[idx]])
 
-    # Generate predictions
+    # Генерация прогнозов
     prediction = model.predict(img_as_ar)
 
-    # Determine what the label is based on the highest probability
+    # Определим, какая метка основана на наибольшей вероятности
     label = np.argmax(prediction)
 
-    # Create the name of the directory and the file for the validation data set
-    # After each run, delete this out_valid/ directory so that old files are not
-    # hanging around in there.
+    # Создадим папку и файл для набора данных проверки.
+    # После каждого запуска удаляем этот каталог out_valid/, чтобы там не болтались старые файлы.
     file_name = str(idx) + "_" + str(label) + "_" + str(np.argmax(str(y_valid[idx]))) + ".jpg"
     img = img_as_ar[0]
 
-    # Reverse the image preprocessing process
+    # Обратный процесс предварительной обработки изображения
     img = object_detection.reverse_preprocess_inception(img)
 
-    # Save the image file
+    # Сохраним изображение
     cv2.imwrite(file_name, cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
 
 print('The validation data set has been saved!')

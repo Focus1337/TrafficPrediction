@@ -14,7 +14,7 @@ file_size = (1920, 1080)  # Предполагается размер файла
 scale_ratio = 1  # Опция для масштабирования до доли исходного размера.
 
 # Сохраним выходное видео со следующим названием и фпс
-output_filename = 'las_vegas_annotated.mp4'
+output_filename = 'video_annotated.mp4'
 output_frames_per_second = 30.0
 
 # Загрузим нейронную сеть SSD, обученную на наборе данных COCO.
@@ -31,6 +31,7 @@ def main():
                              output_frames_per_second,
                              file_size)
 
+    frames_count, fps = cap.get(cv2.CAP_PROP_FRAME_COUNT), cap.get(cv2.CAP_PROP_FPS)
     frame_number = 0
     # Обработаем видео
     while cap.isOpened():
@@ -49,14 +50,15 @@ def main():
             # Сохраним оригинальный кадр
             original_frame = frame.copy()
 
+            frame_number += 1
+
             output_frame = vehicle_detection.perform_object_detection_video(
-                model_ssd, frame)
+                model_ssd, frame, frame_number, frames_count, fps)
 
             # Записываем кадр в выходной видеофайл
             result.write(output_frame)
 
-            frame_number += 1
-            print('{0}: Frame number: {1}'.format(datetime.now(), frame_number))
+            print('{0}: Frame processeed: {1} / {2}'.format(datetime.now(), frame_number, frames_count))
 
         # Если кадров больше не осталось, заканчиваем цикл
         else:

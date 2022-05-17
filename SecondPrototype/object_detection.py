@@ -11,12 +11,10 @@ from tensorflow.keras.applications.inception_v3 import preprocess_input
 # обученную на наборе данных COCO. Подробнее об этом наборе данных можно прочитать здесь:
 #   https://content.alegion.com/datasets/coco-ms-coco-dataset
 # COCO labels здесь: https://github.com/tensorflow/models/blob/master/research/object_detection/data/mscoco_label_map.pbtxt
-LABEL_PERSON = 1
 LABEL_CAR = 3
 LABEL_BUS = 6
 LABEL_TRUCK = 8
 LABEL_TRAFFIC_LIGHT = 10
-LABEL_STOP_SIGN = 13
 
 
 def accept_box(boxes, box_index, tolerance):
@@ -120,9 +118,6 @@ def save_image_annotated(img_rgb, file_name, output, model_traffic_lights=None):
         color = None
         label_text = ""
 
-        if obj_class == LABEL_PERSON:
-            color = (0, 255, 255)
-            label_text = "Person " + str(score)
         if obj_class == LABEL_CAR:
             color = (255, 255, 0)
             label_text = "Car " + str(score)
@@ -132,9 +127,6 @@ def save_image_annotated(img_rgb, file_name, output, model_traffic_lights=None):
         if obj_class == LABEL_TRUCK:
             color = (255, 255, 0)
             label_text = "Truck " + str(score)
-        if obj_class == LABEL_STOP_SIGN:
-            color = (128, 0, 0)
-            label_text = "Stop Sign " + str(score)
         if obj_class == LABEL_TRAFFIC_LIGHT:
             color = (255, 255, 255)
             label_text = "Traffic Light " + str(score)
@@ -255,9 +247,6 @@ def perform_object_detection_video(model, video_frame, model_traffic_lights=None
         color = None
         label_text = ""
 
-        # if obj_class == LABEL_PERSON:
-        # color = (0, 255, 255)
-        # label_text = "Person " + str(score)
         if obj_class == LABEL_CAR:
             color = (255, 255, 0)
             label_text = "Car " + str(score)
@@ -267,9 +256,6 @@ def perform_object_detection_video(model, video_frame, model_traffic_lights=None
         if obj_class == LABEL_TRUCK:
             color = (255, 255, 0)
             label_text = "Truck " + str(score)
-        if obj_class == LABEL_STOP_SIGN:
-            color = (128, 0, 0)
-            label_text = "Stop Sign " + str(score)
         if obj_class == LABEL_TRAFFIC_LIGHT:
             color = (255, 255, 255)
             label_text = "Traffic Light " + str(score)
