@@ -120,16 +120,16 @@ def save_image_annotated(img_rgb, file_name, output, model_traffic_lights=None):
 
         if obj_class == LABEL_CAR:
             color = (255, 255, 0)
-            label_text = "Car " + str(score)
+            label_text = "Car: " + str(score) + '%'
         if obj_class == LABEL_BUS:
             color = (255, 255, 0)
-            label_text = "Bus " + str(score)
+            label_text = "Bus: " + str(score) + '%'
         if obj_class == LABEL_TRUCK:
             color = (255, 255, 0)
-            label_text = "Truck " + str(score)
+            label_text = "Truck: " + str(score) + '%'
         if obj_class == LABEL_TRAFFIC_LIGHT:
             color = (255, 255, 255)
-            label_text = "Traffic Light " + str(score)
+            label_text = "Traffic Light: " + str(score) + '%'
 
             if model_traffic_lights:
 
@@ -145,17 +145,17 @@ def save_image_annotated(img_rgb, file_name, output, model_traffic_lights=None):
                 label = np.argmax(prediction)
                 score_light = str(int(np.max(prediction) * 100))
                 if label == 0:
-                    label_text = "Green " + score_light
+                    label_text = "Green: " + score_light + '%'
                 elif label == 1:
-                    label_text = "Yellow " + score_light
+                    label_text = "Yellow: " + score_light + '%'
                 elif label == 2:
-                    label_text = "Red " + score_light
+                    label_text = "Red: " + score_light + '%'
                 else:
                     label_text = 'NO-LIGHT'  # это не светофор
 
         # Чтобы повысить производительность, лучше поиграться с порогом оценки score.
         # score находится на пороге от 0 до 100. Можно попробовать, например, 40.
-        if color and label_text and accept_box(output["boxes"], idx, 5.0) and score > 50:
+        if color and label_text and accept_box(output["boxes"], idx, 5.0) and score > 40:
             cv2.rectangle(img_rgb, (box["x"], box["y"]), (box["x2"], box["y2"]), color, 2)
             cv2.putText(img_rgb, label_text, (box["x"], box["y"]), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
 
@@ -183,7 +183,8 @@ def perform_object_detection(model, file_name, save_annotated=False, model_traff
     # Запускаем модель
     output = model(input_tensor)
 
-    print("num_detections:", output['num_detections'], int(output['num_detections']))
+    # debug
+    # print("num_detections:", output['num_detections'], int(output['num_detections']))
 
     # Преобразуем тензоры в массив NumPy
     num_detections = int(output.pop('num_detections'))
@@ -191,8 +192,9 @@ def perform_object_detection(model, file_name, save_annotated=False, model_traff
               for key, value in output.items()}
     output['num_detections'] = num_detections
 
-    print('Detection classes:', output['detection_classes'])
-    print('Detection Boxes:', output['detection_boxes'])
+    # debug
+    # print('Detection classes:', output['detection_classes'])
+    # print('Detection Boxes:', output['detection_boxes'])
 
     # Обнаруженные классы должны быть integer
     output['detection_classes'] = output['detection_classes'].astype(np.int64)
@@ -249,16 +251,16 @@ def perform_object_detection_video(model, video_frame, model_traffic_lights=None
 
         if obj_class == LABEL_CAR:
             color = (255, 255, 0)
-            label_text = "Car " + str(score)
+            label_text = "Car: " + str(score) + '%'
         if obj_class == LABEL_BUS:
             color = (255, 255, 0)
-            label_text = "Bus " + str(score)
+            label_text = "Bus: " + str(score) + '%'
         if obj_class == LABEL_TRUCK:
             color = (255, 255, 0)
-            label_text = "Truck " + str(score)
+            label_text = "Truck: " + str(score) + '%'
         if obj_class == LABEL_TRAFFIC_LIGHT:
             color = (255, 255, 255)
-            label_text = "Traffic Light " + str(score)
+            label_text = "Traffic Light: " + str(score) + '%'
 
             if model_traffic_lights:
 
@@ -272,11 +274,11 @@ def perform_object_detection_video(model, video_frame, model_traffic_lights=None
                 label = np.argmax(prediction)
                 score_light = str(int(np.max(prediction) * 100))
                 if label == 0:
-                    label_text = "Green " + score_light
+                    label_text = "Green: " + score_light + '%'
                 elif label == 1:
-                    label_text = "Yellow " + score_light
+                    label_text = "Yellow: " + score_light + '%'
                 elif label == 2:
-                    label_text = "Red " + score_light
+                    label_text = "Red: " + score_light + '%'
                 else:
                     label_text = 'NO-LIGHT'  # это не светофор
 

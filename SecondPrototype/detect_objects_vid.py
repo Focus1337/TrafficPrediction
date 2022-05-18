@@ -28,13 +28,15 @@ def main():
     # Загрузим видео
     cap = cv2.VideoCapture(filename)
 
+    output_fps = cap.get(cv2.CAP_PROP_FPS)  # фпс с оригинального видео
     # Создадим объект VideoWriter, чтобы мы могли сохранить вывод видео.
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     result = cv2.VideoWriter(output_filename,
                              fourcc,
-                             output_frames_per_second,
+                             output_fps,  # output_frames_per_second,
                              file_size)
 
+    frames_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
     frame_number = 0
     # Обработаем видео
     while cap.isOpened():
@@ -60,7 +62,7 @@ def main():
             result.write(output_frame)
 
             frame_number += 1
-            print('{0}: Frame number: {1}'.format(datetime.now(), frame_number))
+            print('{0}: Frame processeed: {1} / {2}'.format(datetime.now(), frame_number, frames_count))
 
         # Если кадров больше не осталось, заканчиваем цикл
         else:

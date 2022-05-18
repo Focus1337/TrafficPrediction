@@ -118,13 +118,13 @@ def save_image_annotated(img_rgb, file_name, output):
 
         if obj_class == LABEL_CAR:
             color = (255, 255, 0)
-            label_text = "Car " + str(score)
+            label_text = "Car: " + str(score) + '%'
         if obj_class == LABEL_BUS:
             color = (255, 255, 0)
-            label_text = "Bus " + str(score)
+            label_text = "Bus: " + str(score) + '%'
         if obj_class == LABEL_TRUCK:
             color = (255, 255, 0)
-            label_text = "Truck " + str(score)
+            label_text = "Truck: " + str(score) + '%'
 
         # Чтобы повысить производительность, лучше поиграться с порогом оценки score.
         # score находится на пороге от 0 до 100. Можно попробовать, например, 40.
