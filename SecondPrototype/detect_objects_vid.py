@@ -9,12 +9,12 @@ from tensorflow.keras.preprocessing.image import load_img
 from datetime import datetime
 
 # Важно: файл должен находиться в том же каталоге, где и наш код.
-filename = 'video.mp4'
+filename = 'C:\Users\Focus\Desktop\trafficPrediction\SecondPrototype\video.mp4'
 file_size = (1920, 1080)  # Предполагается размер файла и формат 1920x1080 mp4
 scale_ratio = 1  # Опция для масштабирования до доли исходного размера.
 
 # Сохраним выходное видео со следующим названием и фпс
-output_filename = 'video_annotated.mp4'
+output_filename = '${0}video_annotated.mp4'.format(filename)
 output_frames_per_second = 30.0
 
 # Загрузим нейронную сеть SSD, обученную на наборе данных COCO.
