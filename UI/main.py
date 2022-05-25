@@ -3,6 +3,9 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
+from obj_img import run
+import asyncio
+from kivy.app import async_runTouchApp
 
 
 class TrafficPrediction(App):
@@ -26,7 +29,8 @@ class TrafficPrediction(App):
         self.file_path_input = file_path_input
 
         button = Button(text='run')
-        button.bind(on_press=self.button_click)
+        button.bind(on_press=self.write_wunning,
+                    on_release=self.button_click)
         window.add_widget(button)
         self.button = button
 
@@ -36,8 +40,18 @@ class TrafficPrediction(App):
 
         return window
 
+    def write_wunning(self, instance):
+        if len(self.file_path_input.text) > 0:
+            self.label.text = 'running'
+        else:
+            self.label.text = 'bad path'
+
     def button_click(self, instance):
-        self.label.text = self.file_path_input.text
+        if len(self.file_path_input.text) > 0:
+            run(self.file_path_input.text)
+            self.label.text = 'done'
+        else:
+            self.label.text = 'bad path'
 
 
 if __name__ == "__main__":
