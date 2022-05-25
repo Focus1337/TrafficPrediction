@@ -3,18 +3,18 @@ from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.textinput import TextInput
-from obj_img import run
-import asyncio
-from kivy.app import async_runTouchApp
+from obj_img import run_img
+from obj_vid import run_vid
 
 
 class TrafficPrediction(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.label = None
-        self.button = None
+        self.img_button = None
         self.file_path_input = None
         self.window = None
+        self.vid_button = None
 
     def build(self):
         window = GridLayout()
@@ -28,11 +28,17 @@ class TrafficPrediction(App):
         window.add_widget(file_path_input)
         self.file_path_input = file_path_input
 
-        button = Button(text='run')
-        button.bind(on_press=self.write_wunning,
-                    on_release=self.button_click)
-        window.add_widget(button)
-        self.button = button
+        img_button = Button(text='run img')
+        img_button.bind(on_press=self.write_wunning,
+                        on_release=self.img_button_click)
+        window.add_widget(img_button)
+        self.img_button = img_button
+
+        vid_button = Button(text='run vid')
+        vid_button.bind(on_press=self.write_wunning,
+                        on_release=self.vid_button_click)
+        window.add_widget(vid_button)
+        self.vid_button = vid_button
 
         label = Label()
         window.add_widget(label)
@@ -46,9 +52,16 @@ class TrafficPrediction(App):
         else:
             self.label.text = 'bad path'
 
-    def button_click(self, instance):
+    def img_button_click(self, instance):
         if len(self.file_path_input.text) > 0:
-            run(self.file_path_input.text)
+            run_img(self.file_path_input.text)
+            self.label.text = 'done'
+        else:
+            self.label.text = 'bad path'
+
+    def vid_button_click(self, instance):
+        if len(self.file_path_input.text) > 0:
+            run_vid(self.file_path_input.text)
             self.label.text = 'done'
         else:
             self.label.text = 'bad path'
