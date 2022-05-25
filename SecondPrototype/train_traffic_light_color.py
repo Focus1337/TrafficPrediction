@@ -21,7 +21,7 @@ print("TensorFlow", tf.__version__)
 print("Keras", keras.__version__)
 
 
-def show_history(history):
+def show_accuracy_history(history):
     """
     Визуализация истории обучения модели нейронной сети
     :param:history — запись значений потерь при обучении и значений
@@ -34,6 +34,22 @@ def show_history(history):
     plt.ylabel('accuracy')
     plt.xlabel('epoch')
     plt.legend(['train_accuracy', 'validation_accuracy'], loc='best')
+    plt.show()
+
+
+def show_loss_history(history):
+    """
+    Визуализация истории обучения модели нейронной сети
+    :param:history — запись значений потерь при обучении и значений
+           показателей в последовательные эпохи, а также значения потерь
+           при проверке и значения показателей проверки.
+    """
+    plt.plot(history.history['loss'])
+    plt.plot(history.history['val_loss'])
+    plt.title('model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend(['train_loss', 'validation_loss'], loc='best')
     plt.show()
 
 
@@ -198,37 +214,38 @@ history_object = model.fit(it_train, epochs=100, validation_data=(
     checkpoint, early_stopping], class_weight=class_weight)
 
 # Выведем историю тренинга
-show_history(history_object)
+show_accuracy_history(history_object)
+show_loss_history(history_object)
 
 # Получим значение потерь (loss) и значения метрик в наборе проверочных данных.
 score = model.evaluate(x_valid, y_valid, verbose=0)
 print('Validation loss:', score[0])
 print('Validation accuracy:', score[1])
 
-print('Saving the validation data set...')
-
-print('Length of the validation data set:', len(x_valid))
-
-# Просмотрим набор проверочных данных и увидим, как модель работала на каждом изображении.
-for idx in range(len(x_valid)):
-    # Сделаем изображение массивом NumPy
-    img_as_ar = np.array([x_valid[idx]])
-
-    # Генерация прогнозов
-    prediction = model.predict(img_as_ar)
-
-    # Определим, какая метка основана на наибольшей вероятности
-    label = np.argmax(prediction)
-
-    # Создадим папку и файл для набора данных проверки.
-    # После каждого запуска удаляем этот каталог out_valid/, чтобы там не болтались старые файлы.
-    file_name = str(idx) + "_" + str(label) + "_" + str(np.argmax(str(y_valid[idx]))) + ".jpg"
-    img = img_as_ar[0]
-
-    # Обратный процесс предварительной обработки изображения
-    img = object_detection.reverse_preprocess_inception(img)
-
-    # Сохраним изображение
-    cv2.imwrite(file_name, cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
-
-print('The validation data set has been saved!')
+# print('Saving the validation data set...')
+#
+# print('Length of the validation data set:', len(x_valid))
+#
+# # Просмотрим набор проверочных данных и увидим, как модель работала на каждом изображении.
+# for idx in range(len(x_valid)):
+#     # Сделаем изображение массивом NumPy
+#     img_as_ar = np.array([x_valid[idx]])
+#
+#     # Генерация прогнозов
+#     prediction = model.predict(img_as_ar)
+#
+#     # Определим, какая метка основана на наибольшей вероятности
+#     label = np.argmax(prediction)
+#
+#     # Создадим папку и файл для набора данных проверки.
+#     # После каждого запуска удаляем этот каталог out_valid/, чтобы там не болтались старые файлы.
+#     file_name = str(idx) + "_" + str(label) + "_" + str(np.argmax(str(y_valid[idx]))) + ".jpg"
+#     img = img_as_ar[0]
+#
+#     # Обратный процесс предварительной обработки изображения
+#     img = object_detection.reverse_preprocess_inception(img)
+#
+#     # Сохраним изображение
+#     cv2.imwrite(file_name, cv2.cvtColor(img, cv2.COLOR_RGB2BGR))
+#
+# print('The validation data set has been saved!')
