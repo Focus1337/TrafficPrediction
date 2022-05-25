@@ -7,8 +7,10 @@ from tensorflow.keras.applications import imagenet_utils
 from tensorflow.keras.preprocessing.image import img_to_array
 from tensorflow.keras.preprocessing.image import load_img
 
+# Загрузим нашу обученную нейронную сеть.
+model_traffic_lights_nn = keras.models.load_model("traffic.h5")
 
-def run(path):
+def run_img(path):
     # Загрузим модель Inception V3.
     model_inception = InceptionV3(weights='imagenet', include_top=True, input_shape=(299, 299, 3))
 
@@ -17,9 +19,6 @@ def run(path):
 
     # Загрузим нейронную сеть SSD, обученную на наборе данных COCO.
     model_ssd = object_detection.load_ssd_coco()
-
-    # Загрузим нашу обученную нейронную сеть.
-    model_traffic_lights_nn = keras.models.load_model("traffic.h5")
 
     # Просмотр всех файлов изображений и определение цветов светофоров.
     for file in files:
