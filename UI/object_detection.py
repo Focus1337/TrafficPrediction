@@ -155,7 +155,7 @@ def save_image_annotated(img_rgb, file_name, output, model_traffic_lights=None):
 
         # Чтобы повысить производительность, лучше поиграться с порогом оценки score.
         # score находится на пороге от 0 до 100. Можно попробовать, например, 40.
-        if color and label_text and accept_box(output["boxes"], idx, 5.0) and score > 40:
+        if color and label_text and accept_box(output["boxes"], idx, 5.0) and score > 37:
             cv2.rectangle(img_rgb, (box["x"], box["y"]), (box["x2"], box["y2"]), color, 2)
             cv2.putText(img_rgb, label_text, (box["x"], box["y"]), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
 
@@ -285,7 +285,7 @@ def perform_object_detection_video(model, video_frame, model_traffic_lights=None
         # Используем переменную оценки, чтобы указать, насколько мы уверены, что это светофор (в %).
         # На реальном видеокадре мы отображаем достоверность того, что свет красный, зеленый,
         # желтый или недействительный светофор.
-        if color and label_text and accept_box(output["boxes"], idx, 5.0) and score > 20:
+        if color and label_text and accept_box(output["boxes"], idx, 5.0) and score > 37:
             cv2.rectangle(img_rgb, (box["x"], box["y"]), (box["x2"], box["y2"]), color, 2)
             cv2.putText(img_rgb, label_text, (box["x"], box["y"]), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
 

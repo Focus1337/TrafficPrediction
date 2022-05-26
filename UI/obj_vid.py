@@ -12,9 +12,6 @@ from datetime import datetime
 file_size = (1920, 1080)  # Предполагается размер файла и формат 1920x1080 mp4
 scale_ratio = 1  # Опция для масштабирования до доли исходного размера.
 
-# Сохраним выходное видео со следующим названием и фпс
-output_frames_per_second = 30.0
-
 # Загрузим нейронную сеть SSD, обученную на наборе данных COCO.
 model_ssd = object_detection.load_ssd_coco()
 
@@ -32,7 +29,7 @@ def run_vid(filename):
     fourcc = cv2.VideoWriter_fourcc(*'mp4v')
     result = cv2.VideoWriter(output_filename,
                              fourcc,
-                             output_fps,  # output_frames_per_second,
+                             output_fps,
                              file_size)
 
     frames_count = cap.get(cv2.CAP_PROP_FRAME_COUNT)
